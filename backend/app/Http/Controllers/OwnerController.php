@@ -19,6 +19,7 @@ class OwnerController extends Controller
             'phone'   => 'nullable|string|max:50',
             'email'   => 'nullable|email|max:255',
             'address' => 'nullable|string|max:255',
+            'status'  => 'nullable|in:Active,Inactive',
         ]);
 
         return response()->json(Owner::create($data), 201);
@@ -36,6 +37,7 @@ class OwnerController extends Controller
             'phone'   => 'nullable|string|max:50',
             'email'   => 'nullable|email|max:255',
             'address' => 'nullable|string|max:255',
+            'status'  => 'nullable|in:Active,Inactive',
         ]);
 
         $owner->update($data);
