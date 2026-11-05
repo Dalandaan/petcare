@@ -1,75 +1,36 @@
-# React + TypeScript + Vite
+# PetCare - Pet Grooming Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A school project with a Laravel (Sanctum) API backend and a React + TypeScript + Vite + Tailwind frontend.
 
-Currently, two official plugins are available:
+## Requirements
+- PHP 8.3+ and Composer
+- Node.js and npm
+- MySQL (Laragon works)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+## Backend setup
 ```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+cd backend
+composer install
+copy .env.example .env
+php artisan key:generate
 ```
+Create a MySQL database named `petcare`, then check the `DB_*` settings in `.env`.
+```
+php artisan migrate
+php artisan serve
+```
+The API runs at http://127.0.0.1:8000
+
+## Frontend setup
+```
+cd frontend
+npm install
+npm run dev
+```
+Open http://localhost:5173
+
+## Features
+- Register and login (by username) with Sanctum tokens
+- Pets: full CRUD through the Laravel API
+- Owners API (Laravel)
+- Owners, Appointments and Services pages (in progress)
