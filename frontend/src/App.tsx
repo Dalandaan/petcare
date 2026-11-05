@@ -15,7 +15,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>(localStorage.getItem('token') ? 'dashboard' : 'login');
   const [menuOpen, setMenuOpen] = useState(false);
   const [pets, setPets] = useState<Pet[]>([]);
-  const [owners, setOwners] = useState<Owner[]>(mock.owners);
+  const [owners, setOwners] = useState<Owner[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>(mock.appointments);
   const [services, setServices] = useState<ServiceItem[]>(mock.services);
 
@@ -23,23 +23,27 @@ export default function App() {
 
   useEffect(() => {
     if (!loggedIn) return;
-    api<Pet[]>('/pets')
-      .then(setPets)
-      .catch((e) => {
-        if (e instanceof ApiError && e.status === 401) {
-          localStorage.removeItem('token');
-          setPets([]);
-          setScreen('login');
-        } else {
-          console.error(e);
-        }
-      });
+
+    const handleError = (e: unknown) => {
+      if (e instanceof ApiError && e.status === 401) {
+        localStorage.removeItem('token');
+        setPets([]);
+        setOwners([]);
+        setScreen('login');
+      } else {
+        console.error(e);
+      }
+    };
+
+    api<Pet[]>('/pets').then(setPets).catch(handleError);
+    api<Owner[]>('/owners').then(setOwners).catch(handleError);
   }, [loggedIn]);
 
   const logout = () => {
     api('/logout', { method: 'POST' }).catch(() => {});
     localStorage.removeItem('token');
     setPets([]);
+    setOwners([]);
     setMenuOpen(false);
     setScreen('login');
   };
@@ -62,6 +66,21 @@ export default function App() {
   const deletePet = async (id: number) => {
     await api(`/pets/${id}`, { method: 'DELETE' });
     setPets(pets.filter((i) => i.id !== id));
+  };
+
+  const addOwner = async (x: Omit<Owner, 'id'>) => {
+    const created = await api<Owner>('/owners', { method: 'POST', body: JSON.stringify(x) });
+    setOwners([created, ...owners]);
+  };
+
+  const updateOwner = async (x: Owner) => {
+    const updated = await api<Owner>(`/owners/${x.id}`, { method: 'PUT', body: JSON.stringify(x) });
+    setOwners(owners.map((i) => (i.id === updated.id ? updated : i)));
+  };
+
+  const deleteOwner = async (id: number) => {
+    await api(`/owners/${id}`, { method: 'DELETE' });
+    setOwners(owners.filter((i) => i.id !== id));
   };
 
   if (screen === 'login')
@@ -101,9 +120,9 @@ export default function App() {
             onAddPet={addPet}
             onUpdatePet={updatePet}
             onDeletePet={deletePet}
-            onAddOwner={(x) => setOwners([...owners, { ...x, id: newId() }])}
-            onUpdateOwner={(x) => setOwners(owners.map((i) => (i.id === x.id ? x : i)))}
-            onDeleteOwner={(id) => setOwners(owners.filter((i) => i.id !== id))}
+            onAddOwner={addOwner}
+            onUpdateOwner={updateOwner}
+            onDeleteOwner={deleteOwner}
             onAddAppointment={(x) => setAppointments([...appointments, { ...x, id: newId() }])}
             onUpdateAppointment={(x) => setAppointments(appointments.map((i) => (i.id === x.id ? x : i)))}
             onDeleteAppointment={(id) => setAppointments(appointments.filter((i) => i.id !== id))}
