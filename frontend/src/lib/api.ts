@@ -1,4 +1,7 @@
-export const API = 'http://127.0.0.1:8000/api';
+const DEFAULT_API = 'https://petcare-zmg3.onrender.com/api';
+
+// Reads VITE_API_URL from the .env files; removes a trailing "/" if there is one
+export const API: string = (import.meta.env.VITE_API_URL ?? DEFAULT_API).replace(/\/$/, '');
 
 export class ApiError extends Error {
   status: number;

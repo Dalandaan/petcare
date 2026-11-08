@@ -26,4 +26,4 @@ return [
     // Token login (Bearer) does not need cookies
     'supports_credentials' => false,
 
-];
+];`
