@@ -12,6 +12,9 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
     && chmod -R 775 storage bootstrap/cache
 
+# Run several PHP workers so one stuck connection can't block everything
+ENV PHP_CLI_SERVER_WORKERS=4
+
 EXPOSE 10000
 
 CMD sh -c "php artisan config:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"
