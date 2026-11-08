@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\PetController;
@@ -15,4 +16,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('pets', PetController::class);
     Route::apiResource('owners', OwnerController::class);
     Route::apiResource('services', ServiceController::class);
+    Route::apiResource('appointments', AppointmentController::class);
 });
