@@ -29,7 +29,17 @@ export const AppRoutes = (p: Props) => {
     case 'owners':
       return <OwnersPage owners={p.owners} onAddOwner={p.onAddOwner} onUpdateOwner={p.onUpdateOwner} onDeleteOwner={p.onDeleteOwner} />;
     case 'appointments':
-      return <AppointmentsPage appointments={p.appointments} onAddAppointment={p.onAddAppointment} onUpdateAppointment={p.onUpdateAppointment} onDeleteAppointment={p.onDeleteAppointment} />;
+      return (
+        <AppointmentsPage
+          pets={p.pets}
+          owners={p.owners}
+          services={p.services}
+          appointments={p.appointments}
+          onAddAppointment={p.onAddAppointment}
+          onUpdateAppointment={p.onUpdateAppointment}
+          onDeleteAppointment={p.onDeleteAppointment}
+        />
+      );
     case 'services':
       return <ServicesPage services={p.services} onAddService={p.onAddService} onUpdateService={p.onUpdateService} onDeleteService={p.onDeleteService} />;
     default:

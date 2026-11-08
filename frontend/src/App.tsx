@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import type { Screen, Pet, Owner, Appointment, ServiceItem } from './types';
-import * as mock from './data/mock';
 import { Sidebar } from './components/common/SideBar';
 import { Header } from './components/common/Header';
 import { AppRoutes } from './routes/AppRoutes';
@@ -9,17 +8,22 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { api, ApiError } from './lib/api';
 
-const newId = () => Date.now();
-
 export default function App() {
   const [screen, setScreen] = useState<Screen>(localStorage.getItem('token') ? 'dashboard' : 'login');
   const [menuOpen, setMenuOpen] = useState(false);
   const [pets, setPets] = useState<Pet[]>([]);
   const [owners, setOwners] = useState<Owner[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>(mock.appointments);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<ServiceItem[]>([]);
 
   const loggedIn = screen !== 'login' && screen !== 'register';
+
+  const clearData = () => {
+    setPets([]);
+    setOwners([]);
+    setServices([]);
+    setAppointments([]);
+  };
 
   useEffect(() => {
     if (!loggedIn) return;
@@ -27,9 +31,7 @@ export default function App() {
     const handleError = (e: unknown) => {
       if (e instanceof ApiError && e.status === 401) {
         localStorage.removeItem('token');
-        setPets([]);
-        setOwners([]);
-        setServices([]);
+        clearData();
         setScreen('login');
       } else {
         console.error(e);
@@ -39,14 +41,13 @@ export default function App() {
     api<Pet[]>('/pets').then(setPets).catch(handleError);
     api<Owner[]>('/owners').then(setOwners).catch(handleError);
     api<ServiceItem[]>('/services').then(setServices).catch(handleError);
+    api<Appointment[]>('/appointments').then(setAppointments).catch(handleError);
   }, [loggedIn]);
 
   const logout = () => {
     api('/logout', { method: 'POST' }).catch(() => {});
     localStorage.removeItem('token');
-    setPets([]);
-    setOwners([]);
-    setServices([]);
+    clearData();
     setMenuOpen(false);
     setScreen('login');
   };
@@ -101,6 +102,44 @@ export default function App() {
     setServices(services.filter((i) => i.id !== id));
   };
 
+  // Appointments are saved with the ids of the chosen pet, owner and service
+  const toAppointmentPayload = (x: Omit<Appointment, 'id'>) => {
+    const pet = pets.find((p) => p.name === x.petName);
+    const owner = owners.find((o) => o.name === x.owner);
+    const service = services.find((s) => s.name === x.service);
+    if (!pet || !owner || !service) {
+      throw new Error('Please choose a pet, an owner and a service.');
+    }
+    return {
+      date: x.date,
+      status: x.status,
+      pet_id: pet.id,
+      owner_id: owner.id,
+      service_id: service.id,
+    };
+  };
+
+  const addAppointment = async (x: Omit<Appointment, 'id'>) => {
+    const created = await api<Appointment>('/appointments', {
+      method: 'POST',
+      body: JSON.stringify(toAppointmentPayload(x)),
+    });
+    setAppointments([...appointments, created]);
+  };
+
+  const updateAppointment = async (x: Appointment) => {
+    const updated = await api<Appointment>(`/appointments/${x.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(toAppointmentPayload(x)),
+    });
+    setAppointments(appointments.map((i) => (i.id === updated.id ? updated : i)));
+  };
+
+  const deleteAppointment = async (id: number) => {
+    await api(`/appointments/${id}`, { method: 'DELETE' });
+    setAppointments(appointments.filter((i) => i.id !== id));
+  };
+
   if (screen === 'login')
     return <LoginPage onLogin={() => setScreen('dashboard')} onSignUp={() => setScreen('register')} />;
   if (screen === 'register')
@@ -141,9 +180,9 @@ export default function App() {
             onAddOwner={addOwner}
             onUpdateOwner={updateOwner}
             onDeleteOwner={deleteOwner}
-            onAddAppointment={(x) => setAppointments([...appointments, { ...x, id: newId() }])}
-            onUpdateAppointment={(x) => setAppointments(appointments.map((i) => (i.id === x.id ? x : i)))}
-            onDeleteAppointment={(id) => setAppointments(appointments.filter((i) => i.id !== id))}
+            onAddAppointment={addAppointment}
+            onUpdateAppointment={updateAppointment}
+            onDeleteAppointment={deleteAppointment}
             onAddService={addService}
             onUpdateService={updateService}
             onDeleteService={deleteService}

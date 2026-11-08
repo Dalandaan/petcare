@@ -2,29 +2,53 @@ import { useState } from 'react';
 import { DataTable } from '../components/ui/DataTable';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { FormModal, type FieldDef } from '../components/ui/FormModal';
-import type { Appointment } from '../types';
+import type { Appointment, Pet, Owner, ServiceItem } from '../types';
 
 type AppointmentInput = Omit<Appointment, 'id'>;
 interface Props {
   appointments: Appointment[];
+  pets?: Pet[];
+  owners?: Owner[];
+  services?: ServiceItem[];
   onAddAppointment: (a: AppointmentInput) => void;
   onUpdateAppointment: (a: Appointment) => void;
   onDeleteAppointment: (id: number) => void;
 }
 
-const fields: FieldDef[] = [
-  { key: 'date', label: 'Date', type: 'date' },
-  { key: 'petName', label: 'Pet name' },
-  { key: 'owner', label: 'Owner' },
-  { key: 'service', label: 'Service' },
-  { key: 'status', label: 'Status', type: 'select', options: ['Pending', 'In Progress', 'Completed'] },
-];
-const empty: AppointmentInput = { date: '', petName: '', owner: '', service: '', status: 'Pending' };
+const unique = (list: string[]) => Array.from(new Set(list));
 
-export const AppointmentsPage = ({ appointments, onAddAppointment, onUpdateAppointment, onDeleteAppointment }: Props) => {
+export const AppointmentsPage = ({
+  appointments,
+  pets = [],
+  owners = [],
+  services = [],
+  onAddAppointment,
+  onUpdateAppointment,
+  onDeleteAppointment,
+}: Props) => {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Appointment | null>(null);
   const close = () => { setAdding(false); setEditing(null); };
+
+  const petNames = unique(pets.map((p) => p.name));
+  const ownerNames = unique(owners.map((o) => o.name));
+  const serviceNames = unique(services.map((s) => s.name));
+
+  const fields: FieldDef[] = [
+    { key: 'date', label: 'Date', type: 'date' },
+    { key: 'petName', label: 'Pet name', type: 'select', options: petNames },
+    { key: 'owner', label: 'Owner', type: 'select', options: ownerNames },
+    { key: 'service', label: 'Service', type: 'select', options: serviceNames },
+    { key: 'status', label: 'Status', type: 'select', options: ['Pending', 'In Progress', 'Completed'] },
+  ];
+
+  const empty: AppointmentInput = {
+    date: '',
+    petName: petNames[0] ?? '',
+    owner: ownerNames[0] ?? '',
+    service: serviceNames[0] ?? '',
+    status: 'Pending',
+  };
 
   return (
     <>
