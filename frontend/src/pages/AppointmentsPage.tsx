@@ -10,8 +10,8 @@ interface Props {
   pets?: Pet[];
   owners?: Owner[];
   services?: ServiceItem[];
-  onAddAppointment: (a: AppointmentInput) => void;
-  onUpdateAppointment: (a: Appointment) => void;
+  onAddAppointment: (a: AppointmentInput) => void | Promise<void>;
+  onUpdateAppointment: (a: Appointment) => void | Promise<void>;
   onDeleteAppointment: (id: number) => void;
 }
 
@@ -70,10 +70,10 @@ export const AppointmentsPage = ({
           fields={fields}
           initial={editing ?? empty}
           onClose={close}
-          onSave={(v) => {
+          onSave={async (v) => {
             const data = v as unknown as AppointmentInput;
-            if (editing) onUpdateAppointment({ ...data, id: editing.id });
-            else onAddAppointment(data);
+            if (editing) await onUpdateAppointment({ ...data, id: editing.id });
+            else await onAddAppointment(data);
             close();
           }}
         />
