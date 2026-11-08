@@ -17,7 +17,7 @@ export default function App() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [owners, setOwners] = useState<Owner[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>(mock.appointments);
-  const [services, setServices] = useState<ServiceItem[]>(mock.services);
+  const [services, setServices] = useState<ServiceItem[]>([]);
 
   const loggedIn = screen !== 'login' && screen !== 'register';
 
@@ -29,6 +29,7 @@ export default function App() {
         localStorage.removeItem('token');
         setPets([]);
         setOwners([]);
+        setServices([]);
         setScreen('login');
       } else {
         console.error(e);
@@ -37,6 +38,7 @@ export default function App() {
 
     api<Pet[]>('/pets').then(setPets).catch(handleError);
     api<Owner[]>('/owners').then(setOwners).catch(handleError);
+    api<ServiceItem[]>('/services').then(setServices).catch(handleError);
   }, [loggedIn]);
 
   const logout = () => {
@@ -44,6 +46,7 @@ export default function App() {
     localStorage.removeItem('token');
     setPets([]);
     setOwners([]);
+    setServices([]);
     setMenuOpen(false);
     setScreen('login');
   };
@@ -81,6 +84,21 @@ export default function App() {
   const deleteOwner = async (id: number) => {
     await api(`/owners/${id}`, { method: 'DELETE' });
     setOwners(owners.filter((i) => i.id !== id));
+  };
+
+  const addService = async (x: Omit<ServiceItem, 'id'>) => {
+    const created = await api<ServiceItem>('/services', { method: 'POST', body: JSON.stringify(x) });
+    setServices([...services, created]);
+  };
+
+  const updateService = async (x: ServiceItem) => {
+    const updated = await api<ServiceItem>(`/services/${x.id}`, { method: 'PUT', body: JSON.stringify(x) });
+    setServices(services.map((i) => (i.id === updated.id ? updated : i)));
+  };
+
+  const deleteService = async (id: number) => {
+    await api(`/services/${id}`, { method: 'DELETE' });
+    setServices(services.filter((i) => i.id !== id));
   };
 
   if (screen === 'login')
@@ -126,9 +144,9 @@ export default function App() {
             onAddAppointment={(x) => setAppointments([...appointments, { ...x, id: newId() }])}
             onUpdateAppointment={(x) => setAppointments(appointments.map((i) => (i.id === x.id ? x : i)))}
             onDeleteAppointment={(id) => setAppointments(appointments.filter((i) => i.id !== id))}
-            onAddService={(x) => setServices([...services, { ...x, id: newId() }])}
-            onUpdateService={(x) => setServices(services.map((i) => (i.id === x.id ? x : i)))}
-            onDeleteService={(id) => setServices(services.filter((i) => i.id !== id))}
+            onAddService={addService}
+            onUpdateService={updateService}
+            onDeleteService={deleteService}
           />
         </main>
       </div>

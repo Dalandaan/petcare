@@ -18,10 +18,12 @@ class ServiceController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
+            'duration' => 'nullable|integer|min:0',
             'status' => 'nullable|string|max:50',
         ]);
 
+        $data['description'] = $data['description'] ?? '';
+        $data['duration'] = $data['duration'] ?? 0;
         $data['status'] = $data['status'] ?? 'Active';
 
         $service = Service::create($data);
@@ -40,9 +42,19 @@ class ServiceController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'sometimes|required|numeric|min:0',
-            'duration' => 'sometimes|required|integer|min:1',
+            'duration' => 'nullable|integer|min:0',
             'status' => 'nullable|string|max:50',
         ]);
+
+        if (array_key_exists('description', $data)) {
+            $data['description'] = $data['description'] ?? '';
+        }
+        if (array_key_exists('duration', $data)) {
+            $data['duration'] = $data['duration'] ?? 0;
+        }
+        if (array_key_exists('status', $data)) {
+            $data['status'] = $data['status'] ?? 'Active';
+        }
 
         $service->update($data);
 
