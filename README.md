@@ -2,14 +2,14 @@
 
 A web-based system for managing a pet grooming business: pets, owners, grooming services and appointments.
 
-**Student:** [Your full name]
-**Course / Section:** [Course and section]
-**Instructor:** [Teacher's name]
+**Student:** Dan Michael Pogoy, John Kycel Inoc
+**Course / Section:** Bsit 3D
+**Instructor:** Irene Eda
 
 ## Live Links
 
 - **Backend API:** https://petcare-zmg3.onrender.com/api
-- **Frontend:** [Add your frontend link here, or "runs locally" if it is not deployed]
+- **Frontend:** http://localhost:5173/
 - **Health check:** https://petcare-zmg3.onrender.com/up
 
 > The backend runs on a free Render instance, which sleeps when idle. The first request after a while can take up to about a minute. Open the health check link first and wait for "Application up".
@@ -81,6 +81,5 @@ All routes start with /api. Everything except register and login needs the heade
 - Secrets (APP_KEY and the database password) are stored as Render environment variables and are never committed to GitHub.
 - The database is a Neon PostgreSQL project.
 
-## Screenshots
 
-[Add screenshots of the Dashboard, Pets, Owners, Services and Appointments pages]
+
