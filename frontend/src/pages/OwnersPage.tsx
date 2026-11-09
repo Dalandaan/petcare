@@ -7,8 +7,8 @@ import type { Owner } from '../types';
 type OwnerInput = Omit<Owner, 'id'>;
 interface Props {
   owners: Owner[];
-  onAddOwner: (o: OwnerInput) => void;
-  onUpdateOwner: (o: Owner) => void;
+  onAddOwner: (o: OwnerInput) => void | Promise<void>;
+  onUpdateOwner: (o: Owner) => void | Promise<void>;
   onDeleteOwner: (id: number) => void;
 }
 
@@ -45,10 +45,10 @@ export const OwnersPage = ({ owners, onAddOwner, onUpdateOwner, onDeleteOwner }:
           fields={fields}
           initial={editing ?? empty}
           onClose={close}
-          onSave={(v) => {
+          onSave={async (v) => {
             const data = v as unknown as OwnerInput;
-            if (editing) onUpdateOwner({ ...data, id: editing.id });
-            else onAddOwner(data);
+            if (editing) await onUpdateOwner({ ...data, id: editing.id });
+            else await onAddOwner(data);
             close();
           }}
         />

@@ -6,7 +6,7 @@ export type PetInput = Omit<Pet, 'id'>;
 
 interface Props {
   initial?: Pet | null;
-  onSave: (pet: PetInput) => void;
+  onSave: (pet: PetInput) => void | Promise<void>;
   onClose: () => void;
 }
 
@@ -15,11 +15,26 @@ const field = 'w-full bg-gray-200 rounded px-3 py-2 text-sm';
 
 export function PetFormModal({ initial, onSave, onClose }: Props) {
   const [form, setForm] = useState<PetInput>(initial ?? empty);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const set = <K extends keyof PetInput>(k: K, v: PetInput[K]) => setForm({ ...form, [k]: v });
+
+  const handleSave = async () => {
+    if (saving) return;
+    setError('');
+    setSaving(true);
+    try {
+      await onSave(form);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-[520px] space-y-3">
+      <div className="bg-white rounded-xl p-6 w-[520px] max-w-[92vw] space-y-3">
         <h3 className="text-lg font-medium">{initial ? 'Edit pet' : 'Add pet'}</h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <label>Pet Name
@@ -47,8 +62,9 @@ export function PetFormModal({ initial, onSave, onClose }: Props) {
             </select>
           </label>
         </div>
+        {error && <p className="text-sm text-red-600">{error}</p>}
         <div className="flex justify-end gap-2 pt-2">
-          <Button onClick={() => onSave(form)}>Save</Button>
+          <Button onClick={handleSave}>{saving ? 'Saving...' : 'Save'}</Button>
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
         </div>
       </div>

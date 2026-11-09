@@ -6,8 +6,8 @@ import type { ServiceItem } from '../types';
 type ServiceInput = Omit<ServiceItem, 'id'>;
 interface Props {
   services: ServiceItem[];
-  onAddService: (s: ServiceInput) => void;
-  onUpdateService: (s: ServiceItem) => void;
+  onAddService: (s: ServiceInput) => void | Promise<void>;
+  onUpdateService: (s: ServiceItem) => void | Promise<void>;
   onDeleteService: (id: number) => void;
 }
 
@@ -42,10 +42,10 @@ export const ServicesPage = ({ services, onAddService, onUpdateService, onDelete
           fields={fields}
           initial={editing ?? empty}
           onClose={close}
-          onSave={(v) => {
+          onSave={async (v) => {
             const data = v as unknown as ServiceInput;
-            if (editing) onUpdateService({ ...data, id: editing.id });
-            else onAddService(data);
+            if (editing) await onUpdateService({ ...data, id: editing.id });
+            else await onAddService(data);
             close();
           }}
         />
